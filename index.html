@@ -134,8 +134,11 @@
     <script>
         // Parse URL parameters
         const params = new URLSearchParams(window.location.search);
+        const action = params.get('action');
+        const inviteId = params.get('id');
         const game = params.get('game') || 'game';
         const stake = params.get('stake') || '50';
+        const from = params.get('from');
 
         // Display game info
         const gameNames = {
@@ -143,19 +146,37 @@
             'chess': 'Chess',
             'checkers': 'Checkers',
             'pool': 'Pool',
+            'POOL': 'Pool',
             'snooker': 'Snooker',
             'uno': 'UNO',
+            'UNO': 'UNO',
             'shooter': 'Shooter',
             'racing': 'Racing',
             'word': 'Word Game',
-            'drafts': 'Drafts'
+            'drafts': 'Drafts',
+            'LUDO': 'Ludo',
+            'CHESS': 'Chess',
+            'CHECKERS': 'Checkers',
+            'DRAFTS': 'Drafts'
         };
 
         document.getElementById('game-name').textContent = gameNames[game] || game;
         document.getElementById('stake-amount').textContent = `💰 KES ${stake} stake`;
 
-        // Deep link URL
-        const deepLink = `shanizgames://play?game=${game}&stake=${stake}`;
+        // Build deep link URL based on action type
+        let deepLink;
+        if (action === 'accept-invite' && inviteId) {
+            // Accept invite deep link
+            deepLink = `shanizgames://accept-invite?inviteId=${inviteId}&game=${game}&stake=${stake}`;
+            if (from) {
+                deepLink += `&from=${encodeURIComponent(from)}`;
+            }
+            document.querySelector('.challenge-title').textContent = '🏆 You\'ve been challenged!';
+        } else {
+            // Regular play deep link
+            deepLink = `shanizgames://play?game=${game}&stake=${stake}`;
+        }
+
         const openBtn = document.getElementById('open-app-btn');
         const downloadBtn = document.getElementById('download-btn');
         const loading = document.getElementById('loading');
