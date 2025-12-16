@@ -68,6 +68,17 @@
             font-size: 20px;
             color: #4ade80;
         }
+        .room-code {
+            font-size: 28px;
+            font-weight: bold;
+            color: #6c63ff;
+            letter-spacing: 4px;
+            margin-top: 12px;
+            padding: 12px 24px;
+            background: rgba(108, 99, 255, 0.2);
+            border-radius: 12px;
+            display: inline-block;
+        }
         .btn {
             display: inline-block;
             padding: 16px 48px;
@@ -90,6 +101,12 @@
             background: transparent;
             border: 2px solid #6c63ff;
         }
+        .btn-accept {
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+        }
+        .btn-accept:hover {
+            box-shadow: 0 10px 30px rgba(74, 222, 128, 0.5);
+        }
         .loading {
             margin-top: 24px;
             color: #888;
@@ -107,6 +124,11 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        .inviter-name {
+            font-size: 16px;
+            color: #a0aec0;
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
@@ -116,9 +138,11 @@
         <p class="subtitle">GAMES</p>
 
         <div class="challenge-box">
-            <p class="challenge-title">🏆 You've been challenged!</p>
+            <p class="challenge-title" id="title">🏆 You've been challenged!</p>
             <p class="game-info" id="game-name">Loading...</p>
             <p class="stake-info" id="stake-amount"></p>
+            <p class="inviter-name" id="inviter-name" style="display:none;"></p>
+            <p class="room-code" id="room-code" style="display:none;"></p>
         </div>
 
         <a href="#" id="open-app-btn" class="btn">Open App & Play</a>
@@ -135,49 +159,81 @@
         // Parse URL parameters
         const params = new URLSearchParams(window.location.search);
         const action = params.get('action');
-        const inviteId = params.get('id');
+        const inviteId = params.get('id') || params.get('inviteId');
+        const roomCode = params.get('room') || params.get('roomCode');
         const game = params.get('game') || 'game';
         const stake = params.get('stake') || '50';
         const from = params.get('from');
 
-        // Display game info
+        // Game name mappings (case-insensitive)
         const gameNames = {
             'ludo': 'Ludo',
             'chess': 'Chess',
             'checkers': 'Checkers',
             'pool': 'Pool',
-            'POOL': 'Pool',
             'snooker': 'Snooker',
             'uno': 'UNO',
-            'UNO': 'UNO',
             'shooter': 'Shooter',
             'racing': 'Racing',
             'word': 'Word Game',
             'drafts': 'Drafts',
-            'LUDO': 'Ludo',
-            'CHESS': 'Chess',
-            'CHECKERS': 'Checkers',
-            'DRAFTS': 'Drafts'
+            'carrom': 'Carrom'
         };
 
-        document.getElementById('game-name').textContent = gameNames[game] || game;
+        // Get game display name
+        const gameLower = game.toLowerCase();
+        const gameName = gameNames[gameLower] || game;
+
+        document.getElementById('game-name').textContent = gameName;
         document.getElementById('stake-amount').textContent = `💰 KES ${stake} stake`;
+
+        const titleEl = document.getElementById('title');
+        const inviterEl = document.getElementById('inviter-name');
+        const roomCodeEl = document.getElementById('room-code');
+        const openBtn = document.getElementById('open-app-btn');
 
         // Build deep link URL based on action type
         let deepLink;
+
         if (action === 'accept-invite' && inviteId) {
             // Accept invite deep link
             deepLink = `shanizgames://accept-invite?inviteId=${inviteId}&game=${game}&stake=${stake}`;
             if (from) {
                 deepLink += `&from=${encodeURIComponent(from)}`;
+                inviterEl.textContent = `From: ${from}`;
+                inviterEl.style.display = 'block';
             }
-            document.querySelector('.challenge-title').textContent = '🏆 You\'ve been challenged!';
+            titleEl.textContent = '🏆 You\'ve been challenged!';
+            openBtn.textContent = 'Accept Challenge';
+            openBtn.classList.add('btn-accept');
+
+        } else if (action === 'join-room' && roomCode) {
+            // Join room with code
+            deepLink = `shanizgames://join-room?roomCode=${roomCode}&game=${game}&stake=${stake}`;
+            if (from) {
+                deepLink += `&from=${encodeURIComponent(from)}`;
+                inviterEl.textContent = `Host: ${from}`;
+                inviterEl.style.display = 'block';
+            }
+            titleEl.textContent = '🚪 Join Private Room';
+            roomCodeEl.textContent = roomCode;
+            roomCodeEl.style.display = 'inline-block';
+            openBtn.textContent = 'Join Room';
+
+        } else if (action === 'spectate') {
+            // Spectate a game
+            const sessionId = params.get('session') || params.get('sessionId');
+            deepLink = `shanizgames://spectate?sessionId=${sessionId}&game=${game}`;
+            titleEl.textContent = '👀 Watch Live Game';
+            openBtn.textContent = 'Watch Now';
+
         } else {
-            // Regular play deep link
+            // Default: play/quick-play link
             deepLink = `shanizgames://play?game=${game}&stake=${stake}`;
+            titleEl.textContent = '🎮 Play Now!';
+            openBtn.textContent = 'Open App & Play';
         }
 
-        const openBtn = document.getElementById('open-app-btn');
         const downloadBtn = document.getElementById('download-btn');
         const loading = document.getElementById('loading');
 
