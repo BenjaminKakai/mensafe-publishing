@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shanzz Games - Game Invite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            text-align: center;
+            max-width: 400px;
+        }
+        .logo {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #6c63ff, #4834d4);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 60px;
+            box-shadow: 0 10px 40px rgba(108, 99, 255, 0.4);
+        }
+        h1 {
+            font-size: 36px;
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: #6c63ff;
+            font-size: 14px;
+            letter-spacing: 8px;
+            margin-bottom: 32px;
+        }
+        .challenge-box {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+        }
+        .challenge-title {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #ffd700;
+        }
+        .game-info {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .stake-info {
+            font-size: 20px;
+            color: #4ade80;
+        }
+        .btn {
+            display: inline-block;
+            padding: 16px 48px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #6c63ff, #4834d4);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            margin: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(108, 99, 255, 0.5);
+        }
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid #6c63ff;
+        }
+        .loading {
+            margin-top: 24px;
+            color: #888;
+            font-size: 14px;
+        }
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(108, 99, 255, 0.3);
+            border-top-color: #6c63ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🎮</div>
+        <h1>SHANZZ</h1>
+        <p class="subtitle">GAMES</p>
+
+        <div class="challenge-box">
+            <p class="challenge-title">🏆 You've been challenged!</p>
+            <p class="game-info" id="game-name">Loading...</p>
+            <p class="stake-info" id="stake-amount"></p>
+        </div>
+
+        <a href="#" id="open-app-btn" class="btn">Open App & Play</a>
+        <br>
+        <a href="#" id="download-btn" class="btn btn-secondary" style="display:none;">Get the APK</a>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            Opening Shanzz Games...
+        </div>
+    </div>
+
+    <script>
+        // Parse URL parameters
+        const params = new URLSearchParams(window.location.search);
+        const game = params.get('game') || 'game';
+        const stake = params.get('stake') || '50';
+
+        // Display game info
+        const gameNames = {
+            'ludo': 'Ludo',
+            'chess': 'Chess',
+            'checkers': 'Checkers',
+            'pool': 'Pool',
+            'snooker': 'Snooker',
+            'uno': 'UNO',
+            'shooter': 'Shooter',
+            'racing': 'Racing',
+            'word': 'Word Game',
+            'drafts': 'Drafts'
+        };
+
+        document.getElementById('game-name').textContent = gameNames[game] || game;
+        document.getElementById('stake-amount').textContent = `💰 KES ${stake} stake`;
+
+        // Deep link URL
+        const deepLink = `shanizgames://play?game=${game}&stake=${stake}`;
+        const openBtn = document.getElementById('open-app-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const loading = document.getElementById('loading');
+
+        openBtn.href = deepLink;
+
+        // Try to open app automatically
+        let appOpened = false;
+
+        function tryOpenApp() {
+            const start = Date.now();
+
+            // Try to open the app
+            window.location.href = deepLink;
+
+            // Check if app opened (page will blur if it did)
+            setTimeout(() => {
+                if (!appOpened && Date.now() - start < 2000) {
+                    // App didn't open, show download button
+                    loading.style.display = 'none';
+                    downloadBtn.style.display = 'inline-block';
+                    downloadBtn.textContent = "Don't have the app? Ask your friend for the APK!";
+                }
+            }, 1500);
+        }
+
+        // Detect if page loses focus (app opened)
+        window.addEventListener('blur', () => {
+            appOpened = true;
+            loading.style.display = 'none';
+        });
+
+        // Try to open app on page load
+        setTimeout(tryOpenApp, 500);
+
+        // Also try on button click
+        openBtn.addEventListener('click', (e) => {
+            loading.style.display = 'block';
+            tryOpenApp();
+        });
+    </script>
+</body>
+</html>
