@@ -197,7 +197,7 @@
 
         if (action === 'accept-invite' && inviteId) {
             // Accept invite deep link
-            deepLink = `shanizgames://accept-invite?inviteId=${inviteId}&game=${game}&stake=${stake}`;
+            deepLink = `shanzz://accept-invite?inviteId=${inviteId}&game=${game}&stake=${stake}`;
             if (from) {
                 deepLink += `&from=${encodeURIComponent(from)}`;
                 inviterEl.textContent = `From: ${from}`;
@@ -209,7 +209,7 @@
 
         } else if (action === 'join-room' && roomCode) {
             // Join room with code
-            deepLink = `shanizgames://join-room?roomCode=${roomCode}&game=${game}&stake=${stake}`;
+            deepLink = `shanzz://join-room?roomCode=${roomCode}&game=${game}&stake=${stake}`;
             if (from) {
                 deepLink += `&from=${encodeURIComponent(from)}`;
                 inviterEl.textContent = `Host: ${from}`;
@@ -223,13 +223,13 @@
         } else if (action === 'spectate') {
             // Spectate a game
             const sessionId = params.get('session') || params.get('sessionId');
-            deepLink = `shanizgames://spectate?sessionId=${sessionId}&game=${game}`;
+            deepLink = `shanzz://spectate?sessionId=${sessionId}&game=${game}`;
             titleEl.textContent = '👀 Watch Live Game';
             openBtn.textContent = 'Watch Now';
 
         } else {
             // Default: play/quick-play link
-            deepLink = `shanizgames://play?game=${game}&stake=${stake}`;
+            deepLink = `shanzz://play?game=${game}&stake=${stake}`;
             titleEl.textContent = '🎮 Play Now!';
             openBtn.textContent = 'Open App & Play';
         }
